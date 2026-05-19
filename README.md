@@ -1,0 +1,185 @@
+# Receipt OCR Renamer & CSV Aggregator
+
+確定申告・医療費控除のためのローカル完結型レシート画像OCRツール。
+クラウドAPIを一切使用せず、プライバシーを完全に保護します。
+
+---
+
+## 🎯 これは何？（30秒で）
+
+- **誰のため**：医療費控除・経費精算でレシートを大量に管理する個人／個人事業主
+- **何が解決される**：スマホで撮りためたレシート画像を **OCR で日付・金額・店舗名を自動抽出 → 規則的なファイル名にリネーム → CSV 集計**。年度末の入力作業を分単位に短縮
+- **なぜ既存ツールではダメか**：家計簿アプリは月額課金＋クラウド送信が前提。本ツールは **完全ローカル（Tesseract）／API キー不要／プライバシー保護**
+- **使う条件**：Python 3.10+ / Tesseract OCR（日本語データ）／Windows・macOS・Linux
+
+## 💰 想定ユースケース・価格帯
+
+| 用途 | 形態 |
+|---|---|
+| 個人の確定申告・医療費控除集計 | 無料（MIT） |
+| 確定申告セット（Selfmed Tax + PDF 自動入力との組合せ） | 個別利用は無料、束ねたパッケージ販売は今後検討 |
+| 個人事業主向け経費仕訳支援・カスタム抽出ルール開発 | 応相談 |
+
+---
+
+## 機能
+
+- レシート画像（JPG/PNG）からOCRでテキストを抽出
+- 正規表現で **日付**・**金額**・**店舗名** を自動認識
+- ファイルを `YYYYMMDD_店舗名_金額円.jpg` に自動リネーム
+- 集計用 CSV を自動生成
+- 読み取り失敗ファイルは `needs_manual_check/` に自動分類
+
+## ディレクトリ構成
+
+```
+receipt-ocr-tool/
+├── main.py                     # CLI エントリーポイント
+├── requirements.txt
+└── receipt_ocr/
+    ├── ocr.py                  # Tesseract OCR ラッパー
+    ├── preprocessor.py         # 画像前処理（グレースケール・二値化）
+    ├── csv_writer.py           # CSV 出力
+    ├── renamer.py              # リネーム・移動処理
+    └── extractors/
+        ├── base.py             # 抽出ルール基底クラス（ABC）
+        └── default.py          # 汎用レシート抽出ルール
+```
+
+## 前提条件
+
+- Python 3.10+
+- Tesseract OCR（日本語言語データ含む）
+
+### Tesseract のインストール
+
+**Windows:**
+
+[UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki) からインストーラーをダウンロードし、インストール時に **Japanese** にチェックを入れてください。
+
+**macOS:**
+
+```bash
+brew install tesseract tesseract-lang
+```
+
+**Ubuntu / Debian:**
+
+```bash
+sudo apt install tesseract-ocr tesseract-ocr-jpn
+```
+
+**インストール確認:**
+
+```bash
+tesseract --version
+tesseract --list-langs   # "jpn" が含まれていれば OK
+```
+
+## セットアップ
+
+```bash
+git clone https://github.com/yourname/receipt-ocr-tool.git
+cd receipt-ocr-tool
+pip install -r requirements.txt
+```
+
+## 使い方
+
+```bash
+# 基本実行
+python main.py ./receipts
+
+# CSV ファイル名を指定
+python main.py ./receipts --output 医療費2025.csv
+
+# 日本語のみで OCR
+python main.py ./receipts --lang jpn
+
+# リネーム・移動せず結果だけ確認（dry-run）
+python main.py ./receipts --dry-run
+```
+
+### オプション一覧
+
+| オプション | 短縮 | デフォルト | 説明 |
+|---|---|---|---|
+| `directory` | - | (必須) | レシート画像のディレクトリ |
+| `--output` | `-o` | `summary.csv` | 出力CSVファイル名 |
+| `--lang` | `-l` | `jpn+eng` | Tesseract言語設定 |
+| `--dry-run` | - | `false` | リネーム・移動を行わず結果を表示 |
+
+## 処理フロー
+
+```
+画像読み込み
+  ↓
+画像前処理（グレースケール → ノイズ除去 → 適応的二値化）
+  ↓
+Tesseract OCR でテキスト抽出
+  ↓
+正規表現マッチング
+  ├─ 日付: YYYY/MM/DD, YYYY年MM月DD日, 令和X年MM月DD日
+  ├─ 金額: 合計行を優先、¥/円 表記に対応
+  └─ 店舗名: 先頭行から推測
+  ↓
+┌─ 成功 → リネーム & CSV追記
+└─ 失敗 → needs_manual_check/ へ移動
+```
+
+## 出力例
+
+### リネーム結果
+
+```
+処理中: IMG_0012.jpg ... → 20250315_マツモトキヨシ_1280円.jpg
+処理中: IMG_0013.jpg ... → 20250320_セブンイレブン_648円.jpg
+処理中: IMG_0014.jpg ... 抽出失敗 → needs_manual_check
+
+完了: 成功 2 件 / 要確認 1 件
+CSV出力: ./receipts/summary.csv
+```
+
+### summary.csv
+
+```csv
+ファイル名,日付,店舗名,金額
+20250315_マツモトキヨシ_1280円.jpg,2025/03/15,マツモトキヨシ,1280
+20250320_セブンイレブン_648円.jpg,2025/03/20,セブンイレブン,648
+```
+
+## 抽出ルールの拡張
+
+`BaseExtractor` を継承して専用の抽出ルールを追加できます。
+
+```python
+# receipt_ocr/extractors/pharmacy.py
+from receipt_ocr.extractors.base import BaseExtractor, ReceiptData
+
+class PharmacyExtractor(BaseExtractor):
+    """薬局レシート専用の抽出ルール"""
+
+    def extract(self, text: str) -> ReceiptData:
+        # 薬局特有のフォーマットに対応した抽出ロジック
+        ...
+```
+
+`main.py` で `extractor = PharmacyExtractor()` に差し替えるだけで利用できます。
+
+## 注意事項
+
+- OCR の精度はレシートの印字品質・撮影条件に依存します。`--dry-run` で事前確認を推奨します
+- `needs_manual_check/` に分類されたファイルは手動で内容を確認してください
+- すべての処理はローカルで完結します。ネットワーク通信は一切行いません
+
+## ライセンス
+
+MIT
+
+---
+
+## 🤝 商用利用・カスタマイズ依頼
+
+- 個人利用は無料（MIT ライセンス）
+- 法人導入支援、カスタマイズ、業務テンプレ整備、追加機能開発は応相談
+- 連絡先：highdefinitionaudiodriver@gmail.com
