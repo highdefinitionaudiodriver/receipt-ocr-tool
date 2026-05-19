@@ -1,3 +1,11 @@
 pytesseract>=0.3.10
 Pillow>=10.0.0
 opencv-python-headless>=4.8.0
+
+# === OCR バックエンド（オプション） ===
+# 日本語認識精度を上げたい場合に追加インストール:
+#   pip install paddleocr paddlepaddle
+# GPU を使う場合は paddlepaddle-gpu。
+# 大きいパッケージ (500MB+) なので必須ではなくオプション扱い。
+# paddleocr>=2.7.0
+# paddlepaddle>=2.5.0

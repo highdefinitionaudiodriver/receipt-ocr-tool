@@ -25,10 +25,34 @@
 ## 機能
 
 - レシート画像（JPG/PNG）からOCRでテキストを抽出
+- **OCR エンジン切替** — Tesseract (デフォルト) / **PaddleOCR** （日本語認識精度大幅向上）
 - 正規表現で **日付**・**金額**・**店舗名** を自動認識
 - ファイルを `YYYYMMDD_店舗名_金額円.jpg` に自動リネーム
 - 集計用 CSV を自動生成
 - 読み取り失敗ファイルは `needs_manual_check/` に自動分類
+
+### OCR エンジン比較
+
+| エンジン | 日本語認識精度 | 起動速度 | インストールサイズ | 推奨用途 |
+|---|---|---|---|---|
+| `tesseract` (デフォルト) | 標準 | 速い | 小 (~50MB) | 印字が綺麗な領収書、件数が多い |
+| `paddle` | **大幅に高い** | 遅い (初回数秒) | 大 (~500MB+モデル) | 薄い印字、感熱紙、手書き混じり |
+
+エンジン指定：
+
+```bash
+# Tesseract (デフォルト)
+python main.py ./receipts
+
+# PaddleOCR (要 pip install paddleocr paddlepaddle)
+python main.py ./receipts --engine paddle
+
+# 環境変数でも指定可
+RECEIPT_OCR_ENGINE=paddle python main.py ./receipts
+
+# 利用可能なエンジン一覧
+python main.py --list-engines
+```
 
 ## ディレクトリ構成
 

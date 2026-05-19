@@ -11,7 +11,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from receipt_ocr.ocr import extract_text
+from receipt_ocr.ocr import extract_text, available_engines
 from receipt_ocr.extractors.default import DefaultExtractor
 from receipt_ocr.renamer import build_new_name, rename_file, move_to_manual_check
 from receipt_ocr.csv_writer import append_to_csv
@@ -23,12 +23,23 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="レシート画像を OCR → リネーム → CSV 集計するローカル専用ツール"
     )
-    parser.add_argument("directory", help="レシート画像が入ったディレクトリ")
+    parser.add_argument(
+        "directory", nargs="?", default=None,
+        help="レシート画像が入ったディレクトリ（--list-engines 使用時は省略可）"
+    )
     parser.add_argument(
         "--output", "-o", default="summary.csv", help="出力CSVファイル名 (default: summary.csv)"
     )
     parser.add_argument(
         "--lang", "-l", default="jpn+eng", help="Tesseract言語 (default: jpn+eng)"
+    )
+    parser.add_argument(
+        "--engine", "-e", default=None, choices=["tesseract", "paddle"],
+        help="OCR エンジン (default: tesseract / 環境変数 RECEIPT_OCR_ENGINE 上書き可)"
+    )
+    parser.add_argument(
+        "--list-engines", action="store_true",
+        help="利用可能な OCR エンジンを表示して終了"
     )
     parser.add_argument(
         "--dry-run", action="store_true", help="リネーム・移動せず結果だけ表示"
@@ -46,6 +57,21 @@ def collect_images(directory: Path) -> list[Path]:
 
 def main() -> None:
     args = parse_args()
+
+    if args.list_engines:
+        engines = available_engines()
+        print("利用可能な OCR エンジン:")
+        for name, ok in engines.items():
+            status = "[OK] 利用可能" if ok else "[--] 未インストール"
+            print(f"  {name:10s} : {status}")
+        print()
+        print("PaddleOCR を使うには: pip install paddleocr paddlepaddle")
+        sys.exit(0)
+
+    if args.directory is None:
+        print("エラー: ディレクトリを指定してください（--help / --list-engines も可）", file=sys.stderr)
+        sys.exit(2)
+
     target_dir = Path(args.directory)
 
     if not target_dir.is_dir():
@@ -67,7 +93,7 @@ def main() -> None:
         print(f"処理中: {img_path.name} ... ", end="", flush=True)
 
         try:
-            text = extract_text(str(img_path), lang=args.lang)
+            text = extract_text(str(img_path), lang=args.lang, engine=args.engine)
         except Exception as e:
             print(f"OCRエラー: {e}")
             if not args.dry_run:
