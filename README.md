@@ -22,6 +22,13 @@
 
 ---
 
+## 🎬 デモ
+
+<!-- docs/demo.gif に「レシート画像フォルダを指定 → OCR → リネーム → summary.csv生成」までの30秒デモGIFを配置してください。 -->
+![Receipt OCR demo](docs/demo.gif)
+
+---
+
 ## 機能
 
 - レシート画像（JPG/PNG）からOCRでテキストを抽出

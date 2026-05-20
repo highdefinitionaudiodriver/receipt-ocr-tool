@@ -1,0 +1,24 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+env/
+.env
+.idea/
+.vscode/
+*.egg-info/
+build/
+dist/
+releases/
+
+# Runtime output
+needs_manual_check/
+summary.csv
+*.log
+
+# Local demo/input data
+receipts/
+test_receipts/
+sample_receipts/
