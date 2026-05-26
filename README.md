@@ -115,6 +115,14 @@ cd receipt-ocr-tool
 pip install -r requirements.txt
 ```
 
+### セットアップ診断
+
+OCR 実行前に Python パッケージ、Tesseract 本体、日本語言語データの状態を確認できます。
+
+```bash
+python tools/check_setup.py
+```
+
 ## 使い方
 
 ```bash
@@ -138,6 +146,8 @@ python main.py ./receipts --dry-run
 | `directory` | - | (必須) | レシート画像のディレクトリ |
 | `--output` | `-o` | `summary.csv` | 出力CSVファイル名 |
 | `--lang` | `-l` | `jpn+eng` | Tesseract言語設定 |
+| `--engine` | `-e` | `tesseract` | OCRエンジン（`tesseract` / `paddle`） |
+| `--list-engines` | - | `false` | 利用可能なOCRエンジンを表示して終了 |
 | `--dry-run` | - | `false` | リネーム・移動を行わず結果を表示 |
 
 ## 処理フロー
@@ -239,11 +249,11 @@ MIT
 ## 現状サマリ (2026-05-25)
 
 - 対象: Receipt OCR Renamer & CSV Aggregator
-- 作業ブランチ: feat/sellable-v1
-- README更新時点の参照コミット: f5d5e9f docs: デモ導線とローカル生成物除外を追加
+- 作業ブランチ: main
+- README更新時点の参照コミット: 2026-05-26 Codex作業時点
 - Python 実行環境向けに requirements.txt を同梱。
 - docs ディレクトリ配下に設計・運用・補足資料を配置。
-- 主要な確認コマンド: python -m pytest または README 記載の Python コマンド
-- 次に進めるなら、README 内の利用手順と既存 docs / tests を起点に、未整備の検証手順・引き継ぎメモ・CI 化を補強する。
+- 主要な確認コマンド: `python tools/check_setup.py` / `python -m unittest discover -s tests`
+- 次に進めるなら、重複ファイル名生成の安定化、実画像fixtureによるOCRスモークテスト、Windows向けTesseractパス設定例のREADME追記を行う。
 <!-- CODEX-CURRENT-STATUS:END -->
 
