@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-04
+
 ### Added
 - `renamer` / `csv_writer` の単体テストと `DefaultExtractor` の追加エッジケーステスト `tests/test_renamer_csv_and_extractor_edges.py`（11ケース）。リネーム名生成・衝突連番・手動確認フォルダ移動、CSV ヘッダー生成/追記/日付整形、日付の各区切り（/ - .）、合計行の優先、不一致時の None、店舗名抽出での電話番号/日付行スキップとファイル名禁止文字除去を検証（既存と合わせ 3→14）
 - README に「これは何？（30秒で）」「想定ユースケース・価格帯」セクションを追加
