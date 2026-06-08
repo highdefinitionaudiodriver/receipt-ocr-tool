@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+PackageIdentifier: highdefinitionaudiodriver.receipt-ocr-tool
+PackageVersion: 0.2.0
+PackageLocale: ja-JP
+Publisher: highdefinitionaudiodriver
+PublisherUrl: https://github.com/highdefinitionaudiodriver
+PackageName: 領収書 OCR ツール
+PackageUrl: https://github.com/highdefinitionaudiodriver/receipt-ocr-tool
+License: MIT
+ShortDescription: 確定申告・医療費控除のためのローカル完結型レシート画像OCRツール。 クラウドAPIを一切使用せず、プライバシーを完全に保護します。
+Moniker: receipt-ocr-tool
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

@@ -1,0 +1,12 @@
+（窓の杜 リリース情報フォーム宛 / 送信先・本文は窓の杜の最新の投稿要領を確認のこと）
+
+【ソフト名称】領収書 OCR ツール
+【バージョン】0.2.0
+【公開日】26/06/08
+【著作権者名】highdefinitionaudiodriver
+【ソフト種別】フリーソフト（無料）
+【ソフト紹介ページのURL】https://github.com/highdefinitionaudiodriver/receipt-ocr-tool
+【ダウンロードページのURL】https://github.com/highdefinitionaudiodriver/receipt-ocr-tool/releases/latest
+
+--- 補足（フォームに紹介文欄がある場合）---
+確定申告・医療費控除のためのローカル完結型レシート画像OCRツール。 クラウドAPIを一切使用せず、プライバシーを完全に保護します。
